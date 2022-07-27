@@ -240,6 +240,14 @@ int	initialize_path_finder(t_room *pass, char *input)
 	// 	}
 	// 	++p;
 	// }
+	// i = 0;
+	// ft_printf("used: \n");
+	// while (i < pass->total)
+	// {
+	// 	ft_printf("%d ", pass->used[i]);
+	// 	++i;
+	// }
+	// exit (0);
 	pass->final_head = NULL;
 	path_finder(&path, pass, 0);
 	if (!pass->final_head)

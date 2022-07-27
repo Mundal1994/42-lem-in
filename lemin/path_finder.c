@@ -104,15 +104,20 @@ static void	find_path(t_path **path, t_room *pass, int i, int prev_index, int k)
 		j = 0;
 		while (pass->links[i][j] != -1)
 		{
+			// if (ft_strcmp(pass->rooms[i], "Fyi2") == 0)
+			// {
+			// 	ft_printf("room orig: %s	{distance: %d <= %d}, distance: %d != 0, %d != previndex{%d}, used == %d(0 if FALSE)\n", pass->rooms[pass->links[i][j]], pass->distance[pass->links[i][j]], pass->distance[i], pass->distance[pass->links[i][j]], pass->links[i][j], prev_index, pass->used[pass->links[i][j]]);
+			// }
 			if (pass->links[i][j] == 0)
 			{
 				//ft_printf("head: %p, move_head: %p, index: %d\n", pass->head, pass->head->move_head, pass->head->move_head->index);
 				//ft_printf("FOUND START!\n");
 				pass->head->found = TRUE;
 				path_finder(path, pass, k);
+				pass->used[i] = FALSE;
 				return ;
 			}
-			if (pass->distance[pass->links[i][j]] <= pass->distance[i] && pass->distance[pass->links[i][j]] != 0 && pass->links[i][j] != prev_index && pass->used[pass->links[i][j]] == FALSE)
+			if (pass->distance[pass->links[i][j]] != 0 && pass->links[i][j] != prev_index && pass->used[pass->links[i][j]] == FALSE)//pass->distance[pass->links[i][j]] <= pass->distance[i] && pass->distance[pass->links[i][j]] != 0 && pass->links[i][j] != prev_index && pass->used[pass->links[i][j]] == FALSE)
 			{
 				// ft_printf("found new rooom\n");
 				// printf_struct(pass);
@@ -123,6 +128,12 @@ static void	find_path(t_path **path, t_room *pass, int i, int prev_index, int k)
 			}
 			j++;
 		}
+		// if (ft_strcmp(pass->rooms[i], "Fyi2") == 0)
+		// {
+		// 	ft_printf("found struct\n");
+		// 	printf_struct(pass);
+		// 	exit(0);
+		// }
 		pass->used[i] = FALSE;
 	}
 }
@@ -136,7 +147,7 @@ void	path_finder(t_path **path, t_room *pass, int i)
 	//ft_printf("link: %d\n", pass->distance[pass->links[pass->end][i]]);
 	//exit(0);
 	start = i;
-	i = 0;
+	//i = 0;
 	if (pass->links[pass->end][i] == 0)
 	{
 		create_path(path, pass);
@@ -159,19 +170,22 @@ void	path_finder(t_path **path, t_room *pass, int i)
 				//{
 					// ft_printf("found new rooom\n");
 					// printf_struct(pass);
+					++i;
 					create_path(path, pass);
-					find_path(&(*path), pass, pass->links[pass->end][i], pass->end, i);
+					find_path(&(*path), pass, pass->links[pass->end][i - 1], pass->end, i);
 					//ft_printf("recurse back\n");
 					del_last_path(path, pass);
 				//}
 			}
-			++i;
-			// if (pass->links[pass->end][i] == -1)
-			// {
-			// 	i = 0;
-			// }
-			// if (i == start)
-			// 	break ;
+			else
+				++i;
+			if (pass->links[pass->end][i] == -1)
+			{
+				i = 0;
+			}
+			if (i == start)
+				break ;
+			//ft_printf("i: %d, links: %d\n", i, pass->links[pass->end][i]);
 		}
 	}
 	if (pass->head && pass->head->found == TRUE)
