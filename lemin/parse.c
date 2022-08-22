@@ -97,6 +97,8 @@ int	create(t_room *pass, char **input)
 	pass->distance = NULL;
 	pass->used = NULL;
 	pass->total = file_save(pass, input);
+	ft_printf("%s", *input);
+	exit(0);
 	pass->end = pass->total - 1;
 	if (pass->total == ERROR)
 		return (error_free(pass, *input, 0, TRUE));
