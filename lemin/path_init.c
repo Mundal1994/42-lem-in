@@ -271,7 +271,6 @@ static void	breadth_first(t_room *pass, int indx, int i)
 					pass->info[CURRENT][i] = pass->links[indx][j];
 				else
 					pass->info[CURRENT][i] = 0;
-				ft_printf("count 2 compare with: %s -> %s room [%d] [%d]\n", pass->rooms[indx], pass->rooms[pass->links[indx][j]], pass->info[CONNECT][pass->links[indx][j]], pass->info[PATH][pass->links[indx][j]]);
 				k = 0;
 				while (k < pass->total)
 				{
@@ -285,7 +284,6 @@ static void	breadth_first(t_room *pass, int indx, int i)
 			}
 			else
 			{
-				ft_printf("path nnbr: %d, count: %d\n", pass->info[PATH][indx], come_from_count);
 				if (pass->info[PATH][indx] == 3 && come_from_count == 2)// || pass->info[PREV][indx] == pass->end))
 					pass->info[PATH][pass->links[indx][j]] = pass->info[PATH][indx];
 				pass->info[CONNECT][pass->links[indx][j]] += 1;
@@ -293,7 +291,7 @@ static void	breadth_first(t_room *pass, int indx, int i)
 					pass->info[CURRENT][i] = pass->links[indx][j];
 				else
 					pass->info[CURRENT][i] = 0;
-				ft_printf("count more compare with: %s -> %s room [%d] [%d]\n", pass->rooms[indx], pass->rooms[pass->links[indx][j]], pass->info[CONNECT][pass->links[indx][j]], pass->info[PATH][pass->links[indx][j]]);
+				ft_printf("count 2 compare with: %s -> %s room [%d] [%d]\n", pass->rooms[indx], pass->rooms[pass->links[indx][j]], pass->info[CONNECT][pass->links[indx][j]], pass->info[PATH][pass->links[indx][j]]);
 				k = 0;
 				while (k < pass->total)
 				{
@@ -366,10 +364,8 @@ static void set_to_one(t_room *pass)
 static int len_of(t_room *pass, int *array)
 {
 	int i = pass->total - 1;
-	ft_printf("array: %d\n", array[i]);
 	while (i >= 0)
 	{
-		ft_printf("array: %d\n", array[i]);
 		if (array[i] != 0)
 			return (i);
 		--i;
@@ -390,7 +386,6 @@ static void	make_connect(t_room *pass)
 	{
 		i = 0;
 		len = len_of(pass, pass->info[CURRENT]) + 1;
-		ft_printf("len : %d\n", len);
 		while (i < len)
 		{
 			if (pass->info[CURRENT][i] != 0)
@@ -399,16 +394,29 @@ static void	make_connect(t_room *pass)
 			}
 			++i;
 		}
-		ft_printf("BEFOREn");
-		print_output(pass);
 		set_to_one(pass);
-		ft_printf("AFTER\n");
 		print_output(pass);
 	}
-	exit(0);
 	print_output(pass);
-	exit(0);
 	
+}
+
+
+static void reset_values(t_room *pass)
+{
+	int i;
+
+	i = 0;
+	while (i < pass->total)
+	{
+		ft_printf("path before: %s %d\n", pass->rooms[i], pass->info[PATH][i]);
+		pass->info[PATH][i] = FALSE;
+		pass->info[LEN][i] = FALSE;
+		pass->info[PREV][i] = FALSE;
+		pass->info[CURRENT][i] = FALSE;
+		ft_printf("path after: %s %d\n", pass->rooms[i], pass->info[PATH][i]);
+		++i;
+	}
 }
 
 int	initialize_path_finder(t_room *pass, char *input)
@@ -425,6 +433,7 @@ int	initialize_path_finder(t_room *pass, char *input)
 	sort_distance(pass);
 	create_len(pass->links[0], &len);
 	make_connect(pass);
+	reset_values(pass);
 	pass->final_head = NULL;
 	i = 0;
 	connect = 0;

@@ -526,49 +526,203 @@ static int	better_choice(t_room *pass)
 	return (FALSE);
 }
 
+static int	more_than_two_above_two_connect(t_room *pass)
+{
+	int i;
+	int	count;
+
+	i = 1;
+	count = 0;
+	while (i < pass->total - 1)
+	{
+		if (pass->info[CONNECT][i] >= 2)
+			++count;
+		++i;
+	}
+	if (count > 2)
+		return (TRUE);
+	return (FALSE);
+}
+
+void	breadth_first_second(t_room *pass, int i);
+
+static int len_of(t_room *pass, int *array)
+{
+	int i = pass->total - 1;
+	while (i >= 0)
+	{
+		if (array[i] != 0)
+			return (i);
+		--i;
+	}
+	return (i);
+}
+
+static void	print_output(t_room *pass)
+{
+	int	i;
+	int	nbr;
+	int	prev;
+	int new;
+
+	new = 0;
+	i = 0;
+	while (pass->links[0][i] >= 0)
+	{
+		nbr = pass->info[PATH][pass->links[0][i]];
+		if (nbr != 0)
+		{
+			ft_printf("{green}PATH [%d] LEN[%d]{uncolor}\n", new, pass->info[LEN][pass->links[0][i]]);
+			prev = pass->info[PREV][pass->links[0][i]];
+			ft_printf("%s\n", pass->rooms[pass->links[0][i]]);
+			while (prev > 0)
+			{
+				ft_printf("%s\n", pass->rooms[prev]);
+				prev = pass->info[PREV][prev];
+			}
+			new++;
+		}
+		++i;
+	}
+	i = 0;
+	ft_printf("\n\n------------\nrooms path nbr:\n");
+	while (i < pass->total)
+	{
+		ft_printf("[%s]: [%d] CONNECT: [%d] CURRENT: [%d]\n",pass->rooms[i], pass->info[PATH][i], pass->info[CONNECT][i], pass->info[CURRENT][i]);
+		++i;
+	}
+}
+
+static int len_is_same(t_room *pass, int len_of_paths)
+{
+	int i = 0;
+
+	while (i < pass->total)
+	{
+		if (pass->info[LEN][pass->info[CURRENT][i]] != 0)
+		{
+			ft_printf("len of paths: %d     len: %d\n", len_of_paths, pass->info[LEN][pass->info[CURRENT][i]]);
+			if (len_of_paths == pass->info[LEN][pass->info[CURRENT][i]])
+				return (FALSE);
+		}
+		++i;
+	}
+	return (TRUE);
+}
+static int choose_optimal_path_to_move(t_room *pass, int round)
+{
+	int i;
+	//int first = 0;
+
+	i = 0;
+	while (1)
+	{
+		ft_printf("NEVER ENDING LOOP\n");
+		if (pass->info[CURRENT][i] != 0 && pass->info[LEN][pass->info[CURRENT][i]] == round)
+		{
+			int j = 0;
+			int options = 0;
+			int connections = 0;
+			ft_printf("ROOM: %s, options : %d, connect: %d\n", pass->rooms[pass->info[CURRENT][i]], options, connections);
+			while (pass->links[pass->info[CURRENT][i]][j] != -1)
+			{
+				// how many paths a room is connected to
+				if (pass->links[pass->info[CURRENT][i]][j] == 0)
+					return (i);
+				if (pass->links[pass->info[CURRENT][i]][j] != pass->end && pass->info[PATH][pass->links[pass->info[CURRENT][i]][j]] == 0)
+					++connections;
+				// how many free options it has with only one as its connection
+				if (pass->links[pass->info[CURRENT][i]][j] != pass->end && pass->info[PATH][pass->links[pass->info[CURRENT][i]][j]] == 0 && \
+				pass->info[CONNECT][pass->links[pass->info[CURRENT][i]][j]] == 1)
+					++options;
+				ft_printf("Room: %s %d   %d\n", pass->rooms[pass->links[pass->info[CURRENT][i]][j]], pass->info[PATH][pass->links[pass->info[CURRENT][i]][j]], pass->info[CONNECT][pass->links[pass->info[CURRENT][i]][j]]);
+				++j;
+			}
+			ft_printf("ROOM: %s, options : %d, connect: %d\n", pass->rooms[pass->info[CURRENT][i]], options, connections);
+			if (pass->info[CURRENT][i] == 11)
+				exit(0);
+			if (options > 0 || connections == 1)
+				return (i);
+		}
+		++i;
+		if (i >= pass->total)
+		{
+			// if (first == 0)
+			// 	first = 1;
+			// if (first == 1)
+			// 	first = 0;
+			i = 0;
+		}
+	}
+	ft_printf("SHOULD NOT END HERE\n");
+	return (ERROR);
+}
+
+
 void	path_finder(t_path **path, t_room *pass, int found, int **len)
 {
 	int	i;
-	int	start_reached;
 
 	i = 0;
 	pass->info[LEN][pass->end] = 1;
 	while (pass->links[pass->end][i] >= 0)
 		initialize_path(pass, i++);
-	while (!current_true(pass))
+	if (more_than_two_above_two_connect(pass) == FALSE)
 	{
-		i = 0;
-		start_reached = FALSE;
-		while (i < pass->total)
+		while (!current_true(pass))
 		{
-			if (pass->info[CURRENT][i] != 0)
-			{
-				breadth_first(pass, pass->info[CURRENT][i], i, found);
-				if (pass->info[PATH][0] == 1)
-				{
-					break ;
-				}
-			}
-			++i;
-		}
-		if (pass->info[PATH][0] == 1)
-		{
-			pass->info[PATH][0] = 0;
-			add_len(pass->info[LEN][pass->info[CURRENT][i]], len);
-			if (max_ant_calc(pass->ants, len, pass->info[LEN][pass->info[CURRENT][i]]) == TRUE)
-				break ;
-			delete_non_found_paths(pass, pass->info[CURRENT][i]);
 			i = 0;
-			while (pass->links[pass->end][i] >= 0)
+			while (i < pass->total)
 			{
-				if (pass->info[PATH][pass->links[pass->end][i]] == 0)
-					initialize_path(pass, i);
+				if (pass->info[CURRENT][i] != 0)
+				{
+					breadth_first(pass, pass->info[CURRENT][i], i, found);
+					if (pass->info[PATH][0] == 1)
+					{
+						break ;
+					}
+				}
 				++i;
 			}
-			//current_path(pass);
-			found = 0;
+			if (pass->info[PATH][0] == 1)
+			{
+				pass->info[PATH][0] = 0;
+				add_len(pass->info[LEN][pass->info[CURRENT][i]], len);
+				if (max_ant_calc(pass->ants, len, pass->info[LEN][pass->info[CURRENT][i]]) == TRUE)
+					break ;
+				delete_non_found_paths(pass, pass->info[CURRENT][i]);
+				i = 0;
+				while (pass->links[pass->end][i] >= 0)
+				{
+					if (pass->info[PATH][pass->links[pass->end][i]] == 0)
+						initialize_path(pass, i);
+					++i;
+				}
+				//current_path(pass);
+				found = 0;
+			}
+			// print_output(pass);
 		}
-		// print_output(pass);
+	}
+	else
+	{
+		ft_printf("-------NEW FUNCTION START HERE--------\n");
+		int len_total;
+		int round;
+		while (!current_true(pass))
+		{
+			i = 0;
+			len_total = len_of(pass, pass->info[CURRENT]) + 1;
+			round = pass->info[LEN][pass->info[CURRENT][0]];
+			while (len_is_same(pass, round) == FALSE)
+			{
+				ft_printf("round: %d\n", round);
+			
+				breadth_first_second(pass, choose_optimal_path_to_move(pass, round));
+			}
+		 print_output(pass);
+		 //exit(0);
+		}
 	}
 	//print_output(pass);
 	//current_path(pass);
@@ -593,6 +747,7 @@ void	path_finder(t_path **path, t_room *pass, int found, int **len)
 			ft_printf("\n");
 		}
 		++i;
+		print_output(pass);
 	}
 	if (!pass->final_head)// && new_path_better(pass, path) == FALSE)
 	{
@@ -605,5 +760,66 @@ void	path_finder(t_path **path, t_room *pass, int found, int **len)
 		copy_to_path(pass, path);
 	}
 	printf_struct(pass);
-	//exit(0);
+	exit(0);
+}
+
+
+
+void	breadth_first_second(t_room *pass, int i)
+{
+	int	j;
+	int	k;
+	int options;
+	int indx;
+
+	j = 0;
+	options = 0;
+	indx = pass->info[CURRENT][i];
+	while (pass->links[indx][j] >= 0)
+	{
+		if (pass->links[indx][j] == 0)
+		{
+			pass->info[PATH][0] = 1;
+			return ;
+		}
+		if (pass->info[PATH][pass->links[indx][j]] == 0 && pass->links[indx][j] != pass->end)
+			++options;
+		++j;
+	}
+	j = 0;
+	while (pass->links[indx][j] >= 0)
+	{
+		if (pass->info[PATH][pass->links[indx][j]] == 0 && (options == 1 || pass->info[CONNECT][pass->links[indx][j]] == 1))
+		{
+			if (pass->links[indx][j] == pass->end)
+				pass->info[CURRENT][i] = 0;
+			else
+			{
+				pass->info[PATH][pass->links[indx][j]] = pass->info[PATH][indx];
+				pass->info[PREV][pass->links[indx][j]] = indx;
+				pass->info[LEN][pass->links[indx][j]] = pass->info[LEN][indx] + 1;
+				pass->info[CURRENT][i] = pass->links[indx][j];
+				k = 0;
+				while (k < pass->total)
+				{
+					if (pass->info[CURRENT][k] == 0)
+					{
+						i = k;
+						break ;
+					}
+					++k;
+				}
+			}
+		}
+		++j;
+	}
+	int n = 0;
+	while (pass->links[indx][n] >= 0)
+	{
+		if (pass->info[PATH][pass->links[indx][n]] == 0 && pass->info[CONNECT][pass->links[indx][n]] > 1)
+			pass->info[CONNECT][pass->links[indx][n]]--;
+		++n;
+	}
+	if (pass->info[CURRENT][i] == indx)
+		pass->info[CURRENT][i] = 0;
 }
