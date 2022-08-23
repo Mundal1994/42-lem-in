@@ -161,6 +161,9 @@ def draw_ant(screen, height, width, blockSize, info, start, end, moves, current_
 	total = info[0]["total"]
 	total_moves = len(moves[current_move]["room"])
 	y_count = 0
+	amount_of_paths = len(moves[0]["ant"])
+	k = 0
+	print (amount_of_paths)
 	for y in range(0, height, blockSize):
 		x_count = 0
 		for x in range(0, width, blockSize):
@@ -170,12 +173,23 @@ def draw_ant(screen, height, width, blockSize, info, start, end, moves, current_
 					j = 0
 					while j < total_moves:
 						if moves[current_move]["room"][j] == info[i]["nbr"]:
-							if moves[current_move]["ant"][j] % 2 == 0:
+							if k == 0:
 								color = (0, 0, 200)
-							elif moves[current_move]["ant"][j] % 3 == 0:
+							elif k == 1:
 								color = (0, 200, 0)
 							else:
 								color = (200, 0, 0)
+								k = 0
+							if k != 2:
+								k += 1
+							if k == amount_of_paths:
+								k = 0
+							#if moves[current_move]["ant"][j] % 2 == 0:
+							#	color = (0, 0, 200)
+							#elif moves[current_move]["ant"][j] % 3 == 0:
+							#	color = (0, 200, 0)
+							#else:
+							#	color = (200, 0, 0)
 							pygame.draw.circle(screen, color, [info[i]["grid_x"] + int(blockSize) / 2, info[i]["grid_y"] + int(blockSize) / 2], int(blockSize) / 4)
 						j += 1
 					break
@@ -273,7 +287,7 @@ def assignNewCoordinates(window_height, window_width, blockSize, info, start, en
 	print(window_width)
 	x1 = 1
 	y1 = 3
-	x2 = 2
+	x2 = 1
 	y2 = 6
 	while i < total:
 		if info[i]["nbr"] == start:
@@ -285,17 +299,23 @@ def assignNewCoordinates(window_height, window_width, blockSize, info, start, en
 		elif i % 2 == 0:
 			info[i]["x"] = x2
 			info[i]["y"] = y2
-			x2 += 4
+			x2 += blockSize
+			if x2 > window_width:
+				x2 = 1
+				y2 += 6
 		else:
 			info[i]["x"] = x1
 			info[i]["y"] = y1
-			x1 += 4
+			x1 += blockSize
+			if x1 > window_width:
+				x1 = 1
+				y1 += 6
 		i += 1
 
 
 # makes the map and displays it in a new window
 
-def make_map(start, end, info, moves):
+def make_map(start, end, info, moves, paths):
 	window_height = 800
 	window_width = 1200
 	blockSize = 20
@@ -543,6 +563,18 @@ def check_rooms(info, line, total, last):
 		info[i]["connect"].append(line[last + 1:len(line)])
 
 
+def store_color_and_path(moves, paths, end):
+	i = 0
+	total = len(moves[i]["ant"])
+	j = 0
+	while i < total:
+		paths[i] = {"path_nbr": i, "room": [], "total": 0}
+		while moves[i]["room"][j] != end:
+			
+			j += 1
+		i += 1
+
+
 # Main loop of collecting all of the information including error checking
 
 def main(argv, argc):
@@ -550,6 +582,7 @@ def main(argv, argc):
 		data=sys.stdin.read().splitlines()
 		info = dict()
 		moves = dict()
+		paths = dict()
 		start = "N"
 		end = "N"
 		ants = -1
@@ -609,7 +642,8 @@ def main(argv, argc):
 			while i < k:
 				moves[i]["total"] = k
 				i += 1
-			make_map(start, end, info, moves)
+			store_color_and_path(moves, paths, end)
+			make_map(start, end, info, moves, paths)
 	else:
 		print("Usage: ./lem-in < maps/subject3.map | ./visu-hex")
 
