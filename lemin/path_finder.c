@@ -546,14 +546,11 @@ void	path_finder(t_path **path, t_room *pass, int found, int **len)
 				breadth_first(pass, pass->info[CURRENT][i], i, found);
 				if (pass->info[PATH][0] == 1)
 				{
-					//start_reached = TRUE;
 					break ;
 				}
 			}
 			++i;
 		}
-		//if (start_reached == TRUE)
-		//	simulate_ending
 		if (pass->info[PATH][0] == 1)
 		{
 			pass->info[PATH][0] = 0;
