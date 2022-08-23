@@ -148,7 +148,7 @@ static void	sort_distance(t_room *pass)
 // 	}
 // }
 
-static void	create_len(int *array, int **len)
+void	create_len(int *array, int **len)
 {
 	int	i;
 
