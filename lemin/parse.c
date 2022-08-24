@@ -104,7 +104,9 @@ int	create(t_room *pass, char **input)
 	{
 		pass->rooms = (char **) malloc((pass->total + 1) * sizeof(char *));
 		pass->links = (int **) malloc(pass->total * sizeof(int *));
-		if (!pass->rooms || !pass->links)
+		pass->prev_path = (int **) malloc(pass->total * sizeof(int *));
+		pass->prev_indx = (int **) malloc(pass->total * sizeof(int *));
+		if (!pass->rooms || !pass->links || !pass->prev_indx || !pass->prev_path)
 		{
 			ft_printf("here\n");
 			return (error_free(pass, *input, 0, FALSE));
@@ -167,18 +169,23 @@ int	create(t_room *pass, char **input)
 					count = count_in(pass->rooms[j], &((*input)[i]), pass->rooms);
 					if (count == -1)
 						exit (0);
+					pass->prev_indx[j] = (int *) malloc((count + 1) * sizeof(int));
+					pass->prev_path[j] = (int *) malloc((count + 1) * sizeof(int));
 					pass->links[j] = (int *) malloc((count + 1) * sizeof(int));
-					if (!pass->links[j])
+					if (!pass->links[j] || !pass->prev_indx[j] || !pass->prev_path[j])
 					{
 						ft_printf("here4\n");
 						return (error_free(pass, *input, j, FALSE));
 					}
 					k = 0;
 					while (k < count + 1)
+					{
+						pass->prev_indx[j][k] = -1;
+						pass->prev_path[j][k] = -1;
 						pass->links[j][k++] = -1;
+					}
 					match_in(pass->rooms[j], &((*input)[i]), pass, j);
 					//match_in(pass->rooms[j], &((*input)[i]), pass->rooms, j, pass);
-					
 					++j;
 				}
 				int nn;

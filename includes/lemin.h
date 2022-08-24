@@ -32,6 +32,8 @@ typedef struct  s_room
 {
 	char	**rooms;
 	int		**links;
+	int		**prev_indx;
+	int		**prev_path;
 	int		*distance;
 	int		**info;
 	int		end;
