@@ -68,6 +68,7 @@ static int	check_if_valid(char *str, int *i, int *total, int *command)
 	else
 	{
 		free(str);
+		str = NULL;
 		if (*i == 1)
 			return (error(COORDINATES));
 		else if (*i > 1)
@@ -80,16 +81,34 @@ static int	check_if_valid(char *str, int *i, int *total, int *command)
 	return (TRUE);
 }
 
+/*	saves line to input	*/
+
+static void	save_line(char **input, char **line)
+{
+	char	*temp;
+	char	*just;  //will think of better way
+
+	if (!(*input))
+		*input = ft_strjoin(*line, "\n");
+	else
+	{
+		temp = ft_strjoin(*line, "\n");
+		just = ft_strjoin(*input, temp);
+		free(*input);
+		free(temp);
+		*input = just;
+	}
+	free(*line);
+}
+
 /*	reads file and stores in string and checks if invalid file	*/
 
-int	parsing_phase(t_room *pass, char **input)
+int	file_save(t_room *pass, char **input)
 {
 	int		ret;
 	int		i;
 	int		command;
 	char	*line;
-	char	*temp;
-	char	*just;  //will think of better way
 	int		total;
 
 	ret = 1;
@@ -101,31 +120,24 @@ int	parsing_phase(t_room *pass, char **input)
 	{
 		ret = get_next_line(0, &line);
 		if (ret == ERROR)
-			return (0);
+			return (ERROR);
 		if (!line)
 			break ;
 		if (is_comment(line) >= TRUE)
 		{
 			if (first_start_or_end(line, i, &command) == ERROR)
+			{
+				free(line);
 				return (error(COMMAND));
+			}
 		}
 		else if (i == 0 && only_digits(line, &i) == TRUE)
 			pass->ants = ft_atoi(line);
 		else if (check_if_valid(line, &i, &total, &command) == ERROR)
-			return (ERROR);
-		if (!(*input))
-			*input = ft_strjoin(line, "\n");
-		else
 		{
-			temp = ft_strjoin(line, "\n");
-			just = ft_strjoin(*input, temp);
-			free(*input);
-			free(temp);
-			*input = just;
+			return (ERROR);
 		}
-		free(line);
+		save_line(input, &line);
 	}
 	return (total);
 }
-
-// how to check if path is valid?
