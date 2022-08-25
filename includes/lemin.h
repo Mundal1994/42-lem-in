@@ -50,7 +50,8 @@ typedef enum
 	PREV,//rooms index we just came from
 	LEN,//len of path in this room
 	CURRENT,//room current path is on
-	CONNECT,//amount of connections in room
+	NEXT,//amount of connections in room
+	JUMP,
 } info;
 
 typedef enum

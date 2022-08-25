@@ -43,15 +43,17 @@ static int	create_used(t_room *pass)
 	pass->info[PREV] = (int *) malloc(pass->total * sizeof(int));
 	pass->info[LEN] = (int *) malloc(pass->total * sizeof(int));
 	pass->info[CURRENT] = (int *) malloc(pass->total * sizeof(int));
-	pass->info[CONNECT] = (int *) malloc(pass->total * sizeof(int));
-	if (!pass->info[PATH] || !pass->info[PREV] || !pass->info[LEN] || !pass->info[CURRENT] || !pass->info[CONNECT])
+	pass->info[NEXT] = (int *) malloc(pass->total * sizeof(int));
+	pass->info[JUMP] = (int *) malloc(pass->total * sizeof(int));
+	if (!pass->info[PATH] || !pass->info[PREV] || !pass->info[LEN] || !pass->info[CURRENT] || !pass->info[NEXT] || !pass->info[JUMP])
 		return (ERROR);
 	while (i < pass->total)
 	{
 		pass->info[PATH][i] = FALSE;
 		pass->info[PREV][i] = FALSE;
 		pass->info[LEN][i] = FALSE;
-		pass->info[CONNECT][i] = FALSE;
+		pass->info[NEXT][i] = FALSE;
+		pass->info[JUMP][i] = FALSE;
 		pass->info[CURRENT][i++] = FALSE;
 	}
 	return (0);
@@ -61,7 +63,6 @@ int	main(int argc, char **argv)
 {
 	t_room	*pass;
 	char	*input;
-	//int		max_paths;
 
 	if (argc == 1 || (argc == 2 && ft_strcmp(argv[1], "-r") == 0))
 	{
@@ -78,10 +79,6 @@ int	main(int argc, char **argv)
 		if (create_used(pass) == ERROR)
 			return (error_path(pass, input, TRUE));
 		distance(pass);
-		// pass->len = len_array(pass->links[pass->end]);
-		// max_paths = calc_max(len_array(pass->links[0]), pass->len);
-		// if (max_paths < 1)
-		// 	return (ERROR);
 		if (initialize_path_finder(pass, input) == ERROR)
 			return (0);
 		ft_printf("%s\n", input);
